@@ -1,29 +1,24 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 )
 
-func commandExplore(cfg *config, param []string) error {
-	if len(param) == 0 {
-		return fmt.Errorf("please provide a location name")
+func commandExplore(cfg *config, args ...string) error {
+	if len(args) != 1 {
+		return errors.New("you must provide a location name")
 	}
 
-	locationName := param[0]
-	pokemonResp, err := cfg.pokeapiClient.GetLocationPokemon(locationName)
+	name := args[0]
+	location, err := cfg.pokeapiClient.GetLocation(name)
 	if err != nil {
 		return err
 	}
-
-	if len(pokemonResp) == 0 {
-		fmt.Println("No Pokémon found in this location.")
-		return nil
-	}
-
-	fmt.Printf("Pokémon found in %s:\n", locationName)
-	for _, name := range pokemonResp {
-		fmt.Println(name)
+	fmt.Printf("Exploring %s...\n", location.Name)
+	fmt.Println("Found Pokemon: ")
+	for _, enc := range location.PokemonEncounters {
+		fmt.Printf(" - %s\n", enc.Pokemon.Name)
 	}
 	return nil
-
 }
